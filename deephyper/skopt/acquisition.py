@@ -40,6 +40,7 @@ def _gaussian_acquisition(
         acq_func_kwargs = dict()
     xi = acq_func_kwargs.get("xi", 0.01)
     kappa = acq_func_kwargs.get("kappa", 1.96)
+    sum_constraint = acq_func_kwargs.get("sum_constraint", np.inf)
 
     # Evaluate acquisition function
     per_second = acq_func.endswith("ps")
@@ -55,7 +56,7 @@ def _gaussian_acquisition(
 
     elif acq_func in ["EI", "PI", "EIps", "PIps"]:
         if acq_func in ["EI", "EIps"]:
-            func_and_grad = gaussian_ei(X, model, y_opt, xi, return_grad)
+            func_and_grad = gaussian_ei(X, model, y_opt, xi, return_grad, sum_constraint)
         else:
             func_and_grad = gaussian_pi(X, model, y_opt, xi, return_grad)
 
@@ -237,7 +238,7 @@ def gaussian_pi(X, model, y_opt=0.0, xi=0.01, return_grad=False):
     return values
 
 
-def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False):
+def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, sum_constraint=np.inf):
     """
     Use the expected improvement to calculate the acquisition values.
 
@@ -310,6 +311,14 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False):
     exploit = improve * cdf
     explore = std[mask] * pdf
     values[mask] = exploit + explore
+
+    if sum_constraint < np.inf:
+        c_model = clone(model)
+        sum_c_x = np.sum(X, axis=1)
+        c_model.fit(X, sum_c_x)
+        sum_c_mu, sum_c_std = c_model.predict(X, return_std=True)
+        sum_c_cdf = norm.cdf(sum_constraint, loc=sum_c_mu, scale=sum_c_std)
+        values *= sum_c_cdf
 
     if return_grad:
         if not np.all(mask):
