@@ -2,6 +2,7 @@ import numpy as np
 import warnings
 
 from scipy.stats import norm
+from sklearn.base import clone
 
 
 def gaussian_acquisition_1D(
