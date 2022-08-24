@@ -200,11 +200,10 @@ class CBO(Search):
                     filter_failures, filter_failures
                 ),
                 "max_failures": max_failures,
-                "sum_constraint": sum_constraint,
             },
             # acquisition function
             acq_func=MAP_acq_func.get(acq_func, acq_func),
-            acq_func_kwargs={"xi": xi, "kappa": kappa},
+            acq_func_kwargs={"xi": xi, "kappa": kappa, "sum_constraint": sum_constraint},
             n_initial_points=self._n_initial_points,
             initial_points=self._initial_points,
             random_state=self._random_state,
