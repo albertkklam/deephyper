@@ -79,6 +79,7 @@ class CBO(Search):
         sync_communication: bool = False,
         filter_failures: str = "mean",
         max_failures: int = 100,
+        constraint=None,
         moo_scalarization_strategy: str = "Chebyshev",
         moo_scalarization_weight=None,
         **kwargs,
@@ -191,6 +192,11 @@ class CBO(Search):
         else:
             self._opt_space = self._problem.space
 
+        if type(constraint) is not dict or constraint is not None:
+            raise ValueError(
+                f"Parameter constraint={constraint} should be a dictionary or None!"
+            )
+
         self._opt = None
         self._opt_kwargs = dict(
             dimensions=self._opt_space,
@@ -210,7 +216,8 @@ class CBO(Search):
             },
             # acquisition function
             acq_func=MAP_acq_func.get(acq_func, acq_func),
-            acq_func_kwargs={"xi": xi, "kappa": kappa},
+            acq_func_kwargs={"xi": xi, "kappa": kappa,
+                             "constraint": constraint},
             n_initial_points=self._n_initial_points,
             initial_points=self._initial_points,
             random_state=self._random_state,

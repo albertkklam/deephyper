@@ -2,6 +2,7 @@ import numpy as np
 import warnings
 
 from scipy.stats import norm
+from sklearn.base import clone
 
 
 def gaussian_acquisition_1D(
@@ -40,6 +41,7 @@ def _gaussian_acquisition(
         acq_func_kwargs = dict()
     xi = acq_func_kwargs.get("xi", 0.01)
     kappa = acq_func_kwargs.get("kappa", 1.96)
+    constraint = acq_func_kwargs.get("constraint", None)
 
     # Evaluate acquisition function
     per_second = acq_func.endswith("ps")
@@ -55,7 +57,7 @@ def _gaussian_acquisition(
 
     elif acq_func in ["EI", "PI", "EIps", "PIps"]:
         if acq_func in ["EI", "EIps"]:
-            func_and_grad = gaussian_ei(X, model, y_opt, xi, return_grad)
+            func_and_grad = gaussian_ei(X, model, y_opt, xi, return_grad, constraint)
         else:
             func_and_grad = gaussian_pi(X, model, y_opt, xi, return_grad)
 
@@ -237,7 +239,7 @@ def gaussian_pi(X, model, y_opt=0.0, xi=0.01, return_grad=False):
     return values
 
 
-def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False):
+def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None):
     """
     Use the expected improvement to calculate the acquisition values.
 
@@ -310,6 +312,15 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False):
     exploit = improve * cdf
     explore = std[mask] * pdf
     values[mask] = exploit + explore
+
+    if constraint is not None:
+        for constraint_func, constraint_val in constraint.items():
+            c_model = clone(model)
+            constraint_func_X = constraint_func(X)
+            c_model.fit(X, constraint_func_X)
+            c_mu, c_std = c_model.predict(X, return_std=True)
+            c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
+            values *= c_cdf
 
     if return_grad:
         if not np.all(mask):
