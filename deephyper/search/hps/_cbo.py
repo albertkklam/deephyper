@@ -192,7 +192,7 @@ class CBO(Search):
         else:
             self._opt_space = self._problem.space
 
-        if type(constraint) is not dict or constraint is not None:
+        if type(constraint) is not dict and constraint is not None:
             raise ValueError(
                 f"Parameter constraint={constraint} should be a dictionary or None!"
             )
