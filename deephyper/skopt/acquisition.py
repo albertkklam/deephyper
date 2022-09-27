@@ -4,6 +4,8 @@ import warnings
 from scipy.stats import norm
 from sklearn.base import clone
 
+import copy
+
 
 def gaussian_acquisition_1D(
     X, model, y_opt=None, acq_func="LCB", acq_func_kwargs=None, return_grad=True
@@ -314,17 +316,32 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
     values[mask] = exploit + explore
 
     if constraint is not None:
+        assert len(constraint) == 1
+        c_values = copy.deepcopy(values)
         for constraint_func, constraint_val in constraint.items():
             c_model = clone(model)
             constraint_func_X = constraint_func(X)
             c_model.fit(X, constraint_func_X)
-            c_mu, c_std = c_model.predict(X, return_std=True)
+
+            if return_grad:
+                c_mu, c_std, c_mu_grad, c_std_grad = c_model.predict(
+                    X, return_std=True, return_mean_grad=True, return_std_grad=True
+                )
+                c_cdf_grad_pdf = norm.pdf((constraint_val - c_mu) / c_std)
+                c_cdf_grad_Z = (-c_mu_grad * c_std - (c_std_grad * (constraint_val - c_mu))) / (c_std ** 2)
+                c_cdf_grad = c_cdf_grad_pdf * c_cdf_grad_Z
+            else:
+                c_mu, c_std = c_model.predict(X, return_std=True)
+
             c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
-            values *= c_cdf
+            c_values *= c_cdf
 
     if return_grad:
         if not np.all(mask):
-            return values, np.zeros_like(std_grad)
+            if constraint is not None:
+                return c_values, np.zeros_like(std_grad)
+            else:
+                return values, np.zeros_like(std_grad)
 
         # Substitute (y_opt - xi - mu) / sigma = t and apply chain rule.
         # improve_grad is the gradient of t wrt x.
@@ -336,6 +353,14 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
         explore_grad = std_grad * pdf + pdf_grad
 
         grad = exploit_grad + explore_grad
-        return values, grad
 
-    return values
+        if constraint is not None:
+            c_grad = (values * c_cdf_grad) + (c_cdf * grad)
+            return c_values, c_grad
+        else:
+            return values, grad
+
+    if constraint is not None:
+        return c_values
+    else:
+        return values
