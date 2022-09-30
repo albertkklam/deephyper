@@ -4,9 +4,6 @@ import warnings
 from scipy.stats import norm
 from sklearn.base import clone
 
-import copy
-
-
 def gaussian_acquisition_1D(
     X, model, y_opt=None, acq_func="LCB", acq_func_kwargs=None, return_grad=True
 ):
@@ -317,7 +314,6 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
 
     if constraint is not None:
         assert len(constraint) == 1
-        c_values = copy.deepcopy(values)
         for constraint_func, constraint_val in constraint.items():
             c_model = clone(model)
             constraint_func_X = constraint_func(X)
@@ -334,7 +330,7 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
                 c_mu, c_std = c_model.predict(X, return_std=True)
 
             c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
-            c_values *= c_cdf
+            c_values = values * c_cdf
 
     if return_grad:
         if not np.all(mask):
