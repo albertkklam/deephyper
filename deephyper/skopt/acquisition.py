@@ -42,6 +42,8 @@ def _gaussian_acquisition(
     kappa = acq_func_kwargs.get("kappa", 1.96)
     constraint = acq_func_kwargs.get("constraint", None)
 
+    print("_gaussian_acquisition.constraint", constraint)
+
     # Evaluate acquisition function
     per_second = acq_func.endswith("ps")
     if per_second:

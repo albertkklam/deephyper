@@ -240,6 +240,10 @@ class Optimizer(object):
         self.acq_func = acq_func
         self.acq_func_kwargs = acq_func_kwargs
 
+        print("Optimizer.acq_func_kwargs:", self.acq_func_kwargs)
+        print("Optimizer.acq_func_kwargs.constraint:", self.acq_func_kwargs["constraint"])
+        print("Optimizer.acq_func:", self.acq_func)
+
         allowed_acq_funcs = ["gp_hedge", "EI", "LCB", "qLCB", "PI", "EIps", "PIps"]
         if self.acq_func not in allowed_acq_funcs:
             raise ValueError(
