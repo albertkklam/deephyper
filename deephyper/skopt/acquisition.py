@@ -328,7 +328,8 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
         else:
             c_mu, c_std = c_model.predict(X, return_std=True)
 
-        np.savetxt("debug/c_mu_" + str(len(X)) + ".csv", c_mu, delimiter=",")
+        save_path = "/nfs/gce/projects/cascades/CascadeSurrogates.jl/test/pyjulia/"
+        np.savetxt(save_path + "debug/c_mu_" + str(len(X)) + ".csv", c_mu, delimiter=",")
         np.savetxt("debug/c_std_" + str(len(X)) + ".csv", c_std, delimiter=",")
         c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
 
