@@ -330,12 +330,12 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
 
         save_path = "/nfs/gce/projects/cascades/CascadeSurrogates.jl/test/pyjulia/"
         np.savetxt(save_path + "debug/c_mu_" + str(len(X)) + ".csv", c_mu, delimiter=",")
-        np.savetxt("debug/c_std_" + str(len(X)) + ".csv", c_std, delimiter=",")
+        np.savetxt(save_path + "debug/c_std_" + str(len(X)) + ".csv", c_std, delimiter=",")
         c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
 
-        np.savetxt("debug/c_cdf_" + str(len(X)) + ".csv", c_cdf, delimiter=",")
+        np.savetxt(save_path + "debug/c_cdf_" + str(len(X)) + ".csv", c_cdf, delimiter=",")
         c_values = values * c_cdf
-        np.savetxt("debug/c_values_" + str(len(X)) + ".csv", c_values, delimiter=",")
+        np.savetxt(save_path + "debug/c_values_" + str(len(X)) + ".csv", c_values, delimiter=",")
 
     if return_grad:
         if not np.all(mask):
