@@ -834,6 +834,8 @@ class Optimizer(object):
             only be fitted after `n_initial_points` points have been told to
             the optimizer irrespective of the value of `fit`.
         """
+        print("Enters tell()")
+
         if self.space.is_config_space:
             pass
         else:
@@ -856,6 +858,8 @@ class Optimizer(object):
 
         This method exists to give access to the internals of adding points
         by side stepping all input validation and transformation."""
+        print("Enters _tell()")
+
         if "ps" in self.acq_func:
             if is_2Dlistlike(x):
                 self.Xi.extend(x)
@@ -885,6 +889,10 @@ class Optimizer(object):
 
         # after being "told" n_initial_points we switch from sampling
         # random points to using a surrogate model
+        print("fit:", fit)
+        print("self._n_initial_points:", self.n_initial_points_)
+        print("self.base_estimator_", self.base_estimator_)
+
         if fit and self._n_initial_points <= 0 and self.base_estimator_ is not None:
             transformed_bounds = np.array(self.space.transformed_bounds)
             est = clone(self.base_estimator_)
@@ -928,6 +936,9 @@ class Optimizer(object):
 
                 X = self.space.imp_const.fit_transform(self.space.transform(X_s))
                 self.next_xs_ = []
+
+                print("self.cand_acq_funcs_:", self.cand_acq_funcs_)
+
                 for cand_acq_func in self.cand_acq_funcs_:
                     values = _gaussian_acquisition(
                         X=X,
@@ -1074,6 +1085,8 @@ class Optimizer(object):
 
     def run(self, func, n_iter=1):
         """Execute ask() + tell() `n_iter` times"""
+        print("Enters run()")
+
         for _ in range(n_iter):
             x = self.ask()
             self.tell(x, func(x))
