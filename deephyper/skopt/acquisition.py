@@ -328,13 +328,13 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
         else:
             c_mu, c_std = c_model.predict(X, return_std=True)
 
-        print("c_mu:", c_mu)
-        print("c_std:", c_std)
+        np.savetxt("debug/c_mu_" + str(len(X)) + ".csv", c_mu, delimiter=",")
+        np.savetxt("debug/c_std_" + str(len(X)) + ".csv", c_std, delimiter=",")
         c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
 
-        print("c_cdf:", c_cdf)
+        np.savetxt("debug/c_cdf_" + str(len(X)) + ".csv", c_cdf, delimiter=",")
         c_values = values * c_cdf
-        print("c_values:", c_values)
+        np.savetxt("debug/c_values_" + str(len(X)) + ".csv", c_values, delimiter=",")
 
     if return_grad:
         if not np.all(mask):
