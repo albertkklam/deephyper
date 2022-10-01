@@ -233,7 +233,7 @@ class CBO(Search):
         self._opt = deephyper.skopt.Optimizer(**self._opt_kwargs)
 
     def _search(self, max_evals, timeout):
-
+        print("Enters _search()")
         if self._opt is None:
             self._setup_optimizer()
 
@@ -261,6 +261,7 @@ class CBO(Search):
 
         # Main loop
         while max_evals < 0 or num_evals_done < max_evals:
+            print("Enters main loop of _search()")
             # Collecting finished evaluations
             logging.info("Gathering jobs...")
             t1 = time.time()

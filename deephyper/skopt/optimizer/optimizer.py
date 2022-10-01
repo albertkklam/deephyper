@@ -505,6 +505,7 @@ class Optimizer(object):
                flavours of `cl_x` strategies.
 
         """
+        print("Enters ask()")
         if n_points is None:
             x = self._ask()
             self.sampled.append(x)
