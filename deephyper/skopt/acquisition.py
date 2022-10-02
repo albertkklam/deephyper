@@ -287,6 +287,7 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
 
+        print("Enters original model.predict")
         if return_grad:
             mu, std, mu_grad, std_grad = model.predict(
                 X, return_std=True, return_mean_grad=True, return_std_grad=True
@@ -294,6 +295,7 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
 
         else:
             mu, std = model.predict(X, return_std=True)
+        print("Exits original model.predict")
 
     # check dimensionality of mu, std so we can divide them below
     if (mu.ndim != 1) or (std.ndim != 1):
@@ -315,11 +317,17 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
     values[mask] = exploit + explore
 
     if constraint is None:
+        print("Enters constraint is None block")
+        print("Cloning model...")
         c_model = clone(model)
+        print("Finished cloning model!")
         constraint_func_X = np.sum(np.absolute(X), axis=1)
         constraint_val = 1.0
+        print("Fitting c_model")
         c_model.fit(X, constraint_func_X)
+        print("Finished fitting c_model")
 
+        print("Enters c_model.predict step...")
         if return_grad:
             c_mu, c_std, c_mu_grad, c_std_grad = c_model.predict(
                 X, return_std=True, return_mean_grad=True, return_std_grad=True
@@ -329,14 +337,20 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
             c_cdf_grad = c_cdf_grad_pdf * c_cdf_grad_Z
         else:
             c_mu, c_std = c_model.predict(X, return_std=True)
+        print("Finished c_model.predict step!")
 
         save_path = "/nfs/gce/projects/cascades/CascadeSurrogates.jl/test/pyjulia/"
         np.savetxt(save_path + "debug/c_mu_" + str(len(X)) + ".csv", c_mu, delimiter=",")
         np.savetxt(save_path + "debug/c_std_" + str(len(X)) + ".csv", c_std, delimiter=",")
-        c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
 
+        print("Enters norm.cdf step for c_cdf...")
+        c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
+        print("Finished norm.cdf step for c_cdf!")
         np.savetxt(save_path + "debug/c_cdf_" + str(len(X)) + ".csv", c_cdf, delimiter=",")
+
+        print("Enters c_values step...")
         c_values = values * c_cdf
+        print("Finished c_values step!")
         np.savetxt(save_path + "debug/c_values_" + str(len(X)) + ".csv", c_values, delimiter=",")
 
     if return_grad:
