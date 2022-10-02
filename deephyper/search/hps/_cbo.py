@@ -271,7 +271,7 @@ class CBO(Search):
             )
 
             if len(new_results) > 0:
-                print("Length of new_results > 0")
+                print("Length of new_results > 0! new_results:", new_results)
 
                 logging.info("Dumping evaluations...")
                 t1 = time.time()
@@ -282,6 +282,9 @@ class CBO(Search):
                 num_evals_done += num_received
 
                 if max_evals > 0 and num_evals_done >= max_evals:
+                    print("Enters max_evals and num_evals_done break!")
+                    print("max_evals:", max_evals)
+                    print("num_evals_done:", num_evals_done)
                     break
 
                 # Transform configurations to list to fit optimizer
@@ -291,6 +294,10 @@ class CBO(Search):
                 opt_X = []
                 opt_y = []
                 for cfg, obj in new_results:
+                    print("Enters cfg, obj loop.")
+                    print("cfg:", cfg)
+                    print("obj:", obj)
+
                     x = list(cfg.values())
                     if np.all(np.isreal(obj)):
                         opt_X.append(x)
@@ -313,7 +320,7 @@ class CBO(Search):
                 t1 = time.time()
 
                 if len(opt_y) > 0:
-                    print("Length of opt_y > 0")
+                    print("Length of opt_y > 0. opt_y:", opt_y)
                     self._opt.tell(opt_X, opt_y)
                     logging.info(f"Fitting took {time.time() - t1:.4f} sec.")
 
