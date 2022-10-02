@@ -271,6 +271,7 @@ class CBO(Search):
             )
 
             if len(new_results) > 0:
+                print("Length of new_results > 0")
 
                 logging.info("Dumping evaluations...")
                 t1 = time.time()
@@ -312,6 +313,7 @@ class CBO(Search):
                 t1 = time.time()
 
                 if len(opt_y) > 0:
+                    print("Length of opt_y > 0")
                     self._opt.tell(opt_X, opt_y)
                     logging.info(f"Fitting took {time.time() - t1:.4f} sec.")
 
