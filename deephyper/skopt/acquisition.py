@@ -3,6 +3,7 @@ import warnings
 
 from scipy.stats import norm
 from sklearn.base import clone
+from copy import deepcopy
 
 def gaussian_acquisition_1D(
     X, model, y_opt=None, acq_func="LCB", acq_func_kwargs=None, return_grad=True
@@ -315,22 +316,28 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
     if constraint is not None:
         assert len(constraint) == 1
         for constraint_func, constraint_val in constraint.items():
-            c_model = clone(model)
+
+            # Gardner method
+            # c_model = clone(model)
+            # constraint_func_X = constraint_func(X)
+            # c_model.fit(X, constraint_func_X)
+            #
+            # if return_grad:
+            #     c_mu, c_std, c_mu_grad, c_std_grad = c_model.predict(
+            #         X, return_std=True, return_mean_grad=True, return_std_grad=True
+            #     )
+            #     c_cdf_grad_pdf = norm.pdf((constraint_val - c_mu) / c_std)
+            #     c_cdf_grad_Z = (-c_mu_grad * c_std - (c_std_grad * (constraint_val - c_mu))) / (c_std ** 2)
+            #     c_cdf_grad = c_cdf_grad_pdf * c_cdf_grad_Z
+            # else:
+            #     c_mu, c_std = c_model.predict(X, return_std=True)
+            #
+            # c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
+            # c_values = values * c_cdf
+
             constraint_func_X = constraint_func(X)
-            c_model.fit(X, constraint_func_X)
-
-            if return_grad:
-                c_mu, c_std, c_mu_grad, c_std_grad = c_model.predict(
-                    X, return_std=True, return_mean_grad=True, return_std_grad=True
-                )
-                c_cdf_grad_pdf = norm.pdf((constraint_val - c_mu) / c_std)
-                c_cdf_grad_Z = (-c_mu_grad * c_std - (c_std_grad * (constraint_val - c_mu))) / (c_std ** 2)
-                c_cdf_grad = c_cdf_grad_pdf * c_cdf_grad_Z
-            else:
-                c_mu, c_std = c_model.predict(X, return_std=True)
-
-            c_cdf = norm.cdf(constraint_val, loc=c_mu, scale=c_std)
-            c_values = values * c_cdf
+            c_values = deepcopy(values)
+            c_values[constraint_func_X > constraint_val] = 0.0
 
     if return_grad:
         if not np.all(mask):
@@ -351,7 +358,13 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
         grad = exploit_grad + explore_grad
 
         if constraint is not None:
-            c_grad = (values * c_cdf_grad) + (c_cdf * grad)
+            # Gardner method
+            # c_grad = (values * c_cdf_grad) + (c_cdf * grad)
+            # return c_values, c_grad
+
+            for constraint_func, constraint_val in constraint.items():
+                c_grad = deepcopy(grad)
+                c_grad[constraint_func > constraint_val] = 0.0
             return c_values, c_grad
         else:
             return values, grad
