@@ -364,7 +364,7 @@ def gaussian_ei(X, model, y_opt=0.0, xi=0.01, return_grad=False, constraint=None
 
             for constraint_func, constraint_val in constraint.items():
                 c_grad = deepcopy(grad)
-                c_grad[constraint_func > constraint_val] = 0.0
+                c_grad[constraint_func_X > constraint_val] = 0.0
             return c_values, c_grad
         else:
             return values, grad
