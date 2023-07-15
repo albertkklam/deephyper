@@ -7,6 +7,7 @@ import ConfigSpace as CS
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
+import scipy.optimize as optimize, LinearConstraint
 from scipy.optimize import fmin_l_bfgs_b
 from sklearn.base import clone, is_regressor
 from sklearn.multioutput import MultiOutputRegressor
@@ -334,6 +335,7 @@ class Optimizer(object):
         self.boltzmann_psucc = acq_optimizer_kwargs.get("boltzmann_psucc", 0)
         self.filter_failures = acq_optimizer_kwargs.get("filter_failures", "mean")
         self.max_failures = acq_optimizer_kwargs.get("max_failures", 100)
+        self.linear_constraint = acq_optimizer_kwargs.get("linear_constraint", None)
         self.acq_optimizer_kwargs = acq_optimizer_kwargs
 
         # Configure search space
@@ -985,25 +987,54 @@ class Optimizer(object):
 
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore")
-                            results = Parallel(n_jobs=self.n_jobs)(
-                                delayed(fmin_l_bfgs_b)(
-                                    gaussian_acquisition_1D,
-                                    x,
-                                    args=(
-                                        est,
-                                        np.min(yi),
-                                        cand_acq_func,
-                                        self.acq_func_kwargs,
-                                    ),
-                                    bounds=self.space.transformed_bounds,
-                                    approx_grad=False,
-                                    maxiter=20,
+                            if self.linear_constraint is None:
+                                results = Parallel(n_jobs=self.n_jobs)(
+                                    delayed(fmin_l_bfgs_b)(
+                                        gaussian_acquisition_1D,
+                                        x,
+                                        args=(
+                                            est,
+                                            np.min(yi),
+                                            cand_acq_func,
+                                            self.acq_func_kwargs,
+                                        ),
+                                        bounds=self.space.transformed_bounds,
+                                        approx_grad=False,
+                                        maxiter=20,
+                                    )
+                                    for x in x0
                                 )
-                                for x in x0
-                            )
 
-                        cand_xs = np.array([r[0] for r in results])
-                        cand_acqs = np.array([r[1] for r in results])
+                                cand_xs = np.array([r[0] for r in results])
+                                cand_acqs = np.array([r[1] for r in results])
+
+                            elif self.linear_constraint is LinearConstraint:
+                                results = Parallel(n_jobs=self.n_jobs)(
+                                    delayed(optimize)(
+                                        gaussian_acquisition_1D,
+                                        x,
+                                        args=(
+                                            est,
+                                            np.min(yi),
+                                            cand_acq_func,
+                                            self.acq_func_kwargs,
+                                        ),
+                                        method="trust-constr",
+                                        constraints=self.linear_constraint,
+                                        bounds=self.space.transformed_bounds,
+                                        options={"maxiter": 20},
+                                    )
+                                    for x in x0
+                                )
+
+                                cand_xs = np.array([r.x for r in results])
+                                cand_acqs = np.array([r.fun for r in results])
+
+                            else:
+                                raise ValueError(
+                                    f"Linear constraint={self.linear_constraint} should be a LinearConstraint or None!"
+                                )
+
                         next_x = cand_xs[np.argmin(cand_acqs)]
 
                     # lbfgs should handle this but just in case there are

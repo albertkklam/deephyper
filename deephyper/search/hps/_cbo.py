@@ -80,6 +80,7 @@ class CBO(Search):
         filter_failures: str = "mean",
         max_failures: int = 100,
         constraint=None,
+        linear_constraint=None,
         moo_scalarization_strategy: str = "Chebyshev",
         moo_scalarization_weight=None,
         **kwargs,
@@ -217,7 +218,8 @@ class CBO(Search):
             # acquisition function
             acq_func=MAP_acq_func.get(acq_func, acq_func),
             acq_func_kwargs={"xi": xi, "kappa": kappa,
-                             "constraint": constraint},
+                             "constraint": constraint,
+                             "linear_constraint": linear_constraint},
             n_initial_points=self._n_initial_points,
             initial_points=self._initial_points,
             random_state=self._random_state,
