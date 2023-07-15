@@ -7,8 +7,8 @@ import ConfigSpace as CS
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-import scipy.optimize as optimize, LinearConstraint
-from scipy.optimize import fmin_l_bfgs_b
+import scipy.optimize as optimize
+from scipy.optimize import fmin_l_bfgs_b, LinearConstraint
 from sklearn.base import clone, is_regressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.utils import check_random_state
