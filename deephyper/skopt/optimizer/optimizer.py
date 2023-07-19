@@ -988,8 +988,6 @@ class Optimizer(object):
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore")
                             if self.linear_constraint is None:
-                                print("Linear constraint is None!")
-                                raise ValueError("Linear constraint should not be None!")
                                 results = Parallel(n_jobs=self.n_jobs)(
                                     delayed(fmin_l_bfgs_b)(
                                         gaussian_acquisition_1D,
@@ -1010,7 +1008,7 @@ class Optimizer(object):
                                 cand_xs = np.array([r[0] for r in results])
                                 cand_acqs = np.array([r[1] for r in results])
 
-                            elif self.linear_constraint is LinearConstraint:
+                            elif type(self.linear_constraint) is LinearConstraint:
                                 results = Parallel(n_jobs=self.n_jobs)(
                                     delayed(optimize)(
                                         gaussian_acquisition_1D,
