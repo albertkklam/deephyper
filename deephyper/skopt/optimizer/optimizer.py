@@ -987,6 +987,8 @@ class Optimizer(object):
 
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore")
+                            print("Linear constraint is None!")
+                            raise ValueError("Linear constraint should not be None!")
                             if self.linear_constraint is None:
                                 results = Parallel(n_jobs=self.n_jobs)(
                                     delayed(fmin_l_bfgs_b)(
