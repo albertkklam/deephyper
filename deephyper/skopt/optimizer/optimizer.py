@@ -1010,7 +1010,7 @@ class Optimizer(object):
 
                             elif type(self.linear_constraint) is LinearConstraint:
                                 results = Parallel(n_jobs=self.n_jobs)(
-                                    delayed(optimize)(
+                                    delayed(optimize.minimize)(
                                         gaussian_acquisition_1D,
                                         x,
                                         args=(
