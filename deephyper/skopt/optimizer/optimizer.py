@@ -338,8 +338,6 @@ class Optimizer(object):
         self.linear_constraint = acq_optimizer_kwargs.get("linear_constraint", None)
         self.acq_optimizer_kwargs = acq_optimizer_kwargs
 
-        print(f"Linear constraint is of type {type(self.linear_constraint)}!")
-
         # Configure search space
 
         if type(dimensions) is CS.ConfigurationSpace:

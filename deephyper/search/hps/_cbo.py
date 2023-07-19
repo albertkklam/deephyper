@@ -214,12 +214,13 @@ class CBO(Search):
                     filter_failures, filter_failures
                 ),
                 "max_failures": max_failures,
+                "linear_constraint": linear_constraint,
             },
             # acquisition function
             acq_func=MAP_acq_func.get(acq_func, acq_func),
             acq_func_kwargs={"xi": xi, "kappa": kappa,
                              "constraint": constraint,
-                             "linear_constraint": linear_constraint},
+                             },
             n_initial_points=self._n_initial_points,
             initial_points=self._initial_points,
             random_state=self._random_state,
