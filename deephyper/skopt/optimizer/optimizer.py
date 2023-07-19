@@ -1009,6 +1009,8 @@ class Optimizer(object):
                                 cand_acqs = np.array([r[1] for r in results])
 
                             elif type(self.linear_constraint) is LinearConstraint:
+                                print("x0: ", x0)
+                                print("x0 type: ", type(x0))
                                 results = Parallel(n_jobs=self.n_jobs)(
                                     delayed(optimize.minimize)(
                                         gaussian_acquisition_1D,
