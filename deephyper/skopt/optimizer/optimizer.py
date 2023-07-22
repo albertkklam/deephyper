@@ -1019,8 +1019,8 @@ class Optimizer(object):
                                             cand_acq_func,
                                             self.acq_func_kwargs,
                                         ),
-                                        method="trust-constr",
-                                        constraints=self.linear_constraint,
+                                        method="L-BFGS-B",
+                                        # constraints=self.linear_constraint,
                                         bounds=self.space.transformed_bounds,
                                         options={"maxiter": 20},
                                     )
