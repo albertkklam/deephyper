@@ -1020,7 +1020,7 @@ class Optimizer(object):
                                         ),
                                         method="L-BFGS-B",
                                         jac=True,
-                                        constraints=self.linear_constraint,
+                                        # constraints=self.linear_constraint,
                                         bounds=self.space.transformed_bounds,
                                         options={"maxiter": 20},
                                     )
