@@ -1023,7 +1023,7 @@ class Optimizer(object):
                                         jac=True,
                                         constraints=self.linear_constraint,
                                         bounds=self.space.transformed_bounds,
-                                        options={"maxiter": 20},
+                                        options={"maxiter": 2000},
                                     )
                                     for x in x0
                                 )
