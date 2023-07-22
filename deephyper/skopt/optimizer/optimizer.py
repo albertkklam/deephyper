@@ -1020,14 +1020,12 @@ class Optimizer(object):
                                         ),
                                         method="L-BFGS-B",
                                         jac=True,
-                                        # constraints=self.linear_constraint,
+                                        constraints=self.linear_constraint,
                                         bounds=self.space.transformed_bounds,
                                         options={"maxiter": 20},
                                     )
                                     for x in x0
                                 )
-
-                                print("results: ", results)
 
                                 cand_xs = np.array([r.x for r in results], dtype=object)
                                 cand_acqs = np.array([r.fun for r in results], dtype=object)
