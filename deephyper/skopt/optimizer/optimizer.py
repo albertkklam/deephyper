@@ -7,8 +7,7 @@ import ConfigSpace as CS
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-import scipy.optimize as optimize
-from scipy.optimize import fmin_l_bfgs_b, LinearConstraint
+from scipy.optimize import minimize, fmin_l_bfgs_b, LinearConstraint
 from sklearn.base import clone, is_regressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.utils import check_random_state
@@ -1010,7 +1009,7 @@ class Optimizer(object):
 
                             elif type(self.linear_constraint) is LinearConstraint:
                                 results = Parallel(n_jobs=self.n_jobs)(
-                                    delayed(optimize.minimize)(
+                                    delayed(minimize)(
                                         gaussian_acquisition_1D,
                                         x,
                                         args=(
@@ -1019,8 +1018,9 @@ class Optimizer(object):
                                             cand_acq_func,
                                             self.acq_func_kwargs,
                                         ),
-                                        method="L-BFGS-B",
-                                        # constraints=self.linear_constraint,
+                                        method="trust-constr",
+                                        jac=True,
+                                        constraints=self.linear_constraint,
                                         bounds=self.space.transformed_bounds,
                                         options={"maxiter": 20},
                                     )
