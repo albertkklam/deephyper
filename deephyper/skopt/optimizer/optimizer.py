@@ -999,7 +999,7 @@ class Optimizer(object):
                                         ),
                                         bounds=self.space.transformed_bounds,
                                         approx_grad=False,
-                                        maxiter=20,
+                                        maxiter=2000,
                                     )
                                     for x in x0
                                 )
